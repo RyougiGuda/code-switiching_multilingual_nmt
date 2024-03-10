@@ -107,15 +107,20 @@ for ((i=0; i<${#LANG_PAIRS[@]}; i+=2)); do
 	done
 done
 '
-
+# use tricks for creating a joined dictionary
+# strip the first three special tokens and append fake counts for each vocabulary
+cut -f1 $BPE/sentencepiece.bpe.vocab  | tail -n +4 | sed 's/$/ 100/g' > dict.txt
 #fairseq-preprocess
 for ((i=0; i<${#LANG_PAIRS[@]}; i+=2)); do
         SRC="${LANG_PAIRS[i]}"
         TGT="${LANG_PAIRS[i+1]}"
 
 	fairseq-preprocess --source-lang $SRC --target-lang $TGT \
-    --trainpref $bpe_path/train.bpe.$SRC-$TGT \
-    --validpref $bpe_path/valid.bpe.$SRC-$TGT \
-    --destdir $processed_path\
-    --workers 10 
+		--trainpref $bpe_path/train.bpe.$SRC-$TGT  \
+	    	--validpref $bpe_path/valid.bpe.$SRC-$TGT  \
+    		--testpref $bpe_path/test.bpe.$SRC-$TGT    \
+    		--destdir $processed_path		   \
+		--srcdict dict.txt    \
+		--tgtdict dict.txt	   \
+    		--workers 10 
 done
