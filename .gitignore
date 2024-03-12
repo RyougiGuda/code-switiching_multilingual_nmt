@@ -1,19 +1,18 @@
 apex/*
 fairseq/*
-
 data/bpe/*
 data/bpe_path/*
 data/dictionaries/*
 data/divided_data/*
 data/moses_path/*
-data/processed_path/*
+data/*
 data/raw/*
 data/vectors/*
 data/wordsim/*
 requirements/*
 logs/*
 model/*
-
+scripts/checkpoints
 
 
 
@@ -21,12 +20,8 @@ model/*
 !apex/*.gitkeep
 !fairseq/*.gitkeep
 !data/*.gitkeep
-!data/bpe/*.gitkeep
-!data/bpe_path/*.gitkeep
+
 !data/dictionaries/*.gitkeep
-!data/divided_data/*.gitkeep
-!data/moses_path/*.gitkeep
-!data/processed_path/*.gitkeep
 !data/raw/*.gitkeep
 !data/vectors/*.gitkeep
 !data/wordsim/*.gitkeep
