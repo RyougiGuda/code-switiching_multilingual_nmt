@@ -7,24 +7,23 @@ TRAIN_MINLEN=1  # remove sentences with <1 BPE token
 TRAIN_MAXLEN=250  # remove sentences with >250 BPE tokens
 data_root="/home/ryougiguda/Projects/multilingual_nmt/data"   # 指定文件夹路径
 data_path=$data_root/divided_data #最初经过对raw数据进行分解后得到的数据
-symlink_path=$data_root/symlink_path #经过symlink处理之后的双向数据
-moses_path=$data_root/moses_path #经过mosesdecoder处理后
-bpe_path=$data_root/bpe_path #经过bpe处理后
-add_tokens_path=$data_root/add_tokens_path #经过add_tokens处理后
-merged_path=$data_root/merged_path #经过merged处理后
-processed_path=$data_root/data/processed_path #经过preprocess函数处理后
+symlink_path=$data_root/baseline/symlink_path #经过symlink处理之后的双向数据
+moses_path=$data_root/baseline/moses_path #经过mosesdecoder处理后
+data_for_bpe_learning=$data_root/baseline/data_for_bpe_learning #经过初步处理后，用于bpe学习
+bpe_path=$data_root/baseline/bpe_path #经过bpe处理后
+add_tokens_path=$data_root/baseline/add_tokens_path #经过add_tokens处理后
+merged_path=$data_root/baseline/merged_path #经过merged处理后
+processed_path=$data_root/baseline/processed_path #经过preprocess函数处理后
 BPE_out=$data_root/bpe #存储学习到的bpe model
-BPEROOT="../requirements/subword-nmt"
-BPESIZE=30000
+BPESIZE=35000
 moses_decoder="../requirements/mosesdecoder"
-data_for_bpe_learning=$data_root/data_for_bpe_learning
 SCRIPTS=$moses_decoder/scripts
-TOKENIZER=$SCRIPTS/tokenizer/tokenizer.perl
+TOKENIZER=$SCRIPTS/tokenizer
 LC=$SCRIPTS/tokenizer/lowercase.perl
 CLEAN=$SCRIPTS/training/clean-corpus-n.perl
-LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名的索引
-    "ar de"
-    "de ar"
+LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名的索引 
+    #"ar de"
+    #"de ar" 由于ar采取右对齐，数据处理上存在问题，暂时放弃这个数据集
     "de ru"
     "ru de"
     "en fr"
@@ -37,7 +36,7 @@ LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名�
     "fr es"
 )
 LANG_PAIRS_real=( #actual exist lang pairs
-    "ar de"
+    #"ar de"
     "de ru"
     "en fr"
     "en ru"
@@ -84,20 +83,22 @@ if [ "${stats:1:1}" == "0" ]; then  #判断是否已执行过
 		echo "${SRC}-${TGT}"
 		for lang in $SRC $TGT; do
 	  		for f in train valid test ;do
-	    			perl ${TOKENIZER} -l ${lang} < ${symlink_path}/${f}.${SRC}-${TGT}.${lang} > ${moses_path}/${f}.tags.${SRC}-${TGT}.tok.${lang}
+	    			cat "${symlink_path}/${f}.${SRC}-${TGT}.${lang}" | perl ${TOKENIZER}/normalize-punctuation.perl | perl ${TOKENIZER}/tokenizer.perl -a -q -l ${lang} > ${moses_path}/${f}.${SRC}-${TGT}.tok.${lang}
+	    			
 	    		# 如果是中，额外进行一步分词处理
 	    		if [ ${lang} = zh ];then
-	      			python -m jieba -d " " ${moses_path}/${f}.tags.${SRC}-${TGT}.tok.${lang} > ${moses_path}/temp.txt
-	      			mv ${moses_path}/temp.txt ${moses_path}/${f}.tags.${SRC}-${TGT}.tok.${lang}
+	      			python -m jieba -d " " ${moses_path}/${f}.${SRC}-${TGT}.tok.${lang} > ${moses_path}/temp.txt
+	      			mv ${moses_path}/temp.txt ${moses_path}/${f}.${SRC}-${TGT}.tok.${lang}
 	    		fi
 			done
 		done
+		#(solved)big mistake--this will clean different lines to parallel corpus!! --reason: divided_data forgot to remove /n in the target language, leads to empty rolls in target language corpus
 		for f in train valid test ;do
-			perl $CLEAN -ratio 1.5 ${moses_path}/${f}.tags.${SRC}-${TGT}.tok $SRC $TGT ${moses_path}/${f}.tags.${SRC}-${TGT}.clean 1 175
+			perl $CLEAN -ratio 1.5 ${moses_path}/${f}.${SRC}-${TGT}.tok $SRC $TGT ${moses_path}/${f}.${SRC}-${TGT}.clean 1 175 
 		done
 		for f in train valid test ;do
 			for l in $SRC $TGT; do
-	        		perl $LC < ${moses_path}/${f}.tags.${SRC}-${TGT}.clean.$l > ${data_for_bpe_learning}/${f}.tags.${SRC}-${TGT}.$l
+	        		perl $LC < ${moses_path}/${f}.${SRC}-${TGT}.clean.$l > ${data_for_bpe_learning}/${f}.${SRC}-${TGT}.$l
 	    		done
 	    	done	
 	done
@@ -117,7 +118,6 @@ if [ "${stats:2:1}" == "0" ]; then
        	--vocab_size=$BPESIZE \
        	--character_coverage=1.0 \
        	--model_type=bpe
-      	--train_extremely_large_corpus
     echo "complete bpe learining!"
 
 else
@@ -140,9 +140,9 @@ if [ "${stats:3:1}" == "0" ]; then
 			python "$SPM_ENCODE" \
         		--model "$BPE_out/sentencepiece.bpe.model" \
         		--output_format=piece \
-        		--inputs $data_for_bpe_learning/$f.tags.${SRC}-${TGT}.${SRC} $data_for_bpe_learning/$f.tags.${SRC}-${TGT}.${TGT} \
+        		--inputs $data_for_bpe_learning/$f.${SRC}-${TGT}.${SRC} $data_for_bpe_learning/$f.${SRC}-${TGT}.${TGT} \
         		--outputs $bpe_path/$f.${SRC}-${TGT}.bpe.${SRC} $bpe_path/$f.${SRC}-${TGT}.bpe.${TGT} \
-        		--min-len $TRAIN_MINLEN --max-len $TRAIN_MAXLEN
+        		--min-len $TRAIN_MINLEN --max-len $TRAIN_MAXLEN  
 		done
 	done
 
@@ -158,7 +158,7 @@ if [ "${stats:4:1}" == "0" ]; then
     		TGT=${PAIR[1]}
 		for f in train valid test;do 
 			cat $bpe_path/$f.${SRC}-${TGT}.bpe.${SRC} | python add_tokens.py --tag "<2${TGT}>" > $add_tokens_path/$f.${SRC}-${TGT}.${SRC}
-			cat $bpe_path/$f.${SRC}-${TGT}.bpe.${TGT}  | python add_tokens.py --tag "<2${SRC}>" > $add_tokens_path/$f.${SRC}-${TGT}.${TGT}
+			cat $bpe_path/$f.${SRC}-${TGT}.bpe.${TGT}  > $add_tokens_path/$f.${SRC}-${TGT}.${TGT}
     		done
 	done
 
