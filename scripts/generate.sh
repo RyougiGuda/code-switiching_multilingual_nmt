@@ -1,4 +1,4 @@
-path_2_data=../data/processed_path
+path_2_data=../data/baseline/processed_path
 
 
 fairseq-generate $path_2_data \
