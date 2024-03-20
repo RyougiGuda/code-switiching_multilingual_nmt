@@ -1,5 +1,5 @@
 #!/bin/bash
-ROOT=../fairseq
+ROOT=../../fairseq
 SCRIPTS=$ROOT/scripts
 SPM_TRAIN=$SCRIPTS/spm_train.py
 SPM_ENCODE=$SCRIPTS/spm_encode.py
@@ -15,8 +15,8 @@ add_tokens_path=$data_root/baseline/add_tokens_path #经过add_tokens处理后
 merged_path=$data_root/baseline/merged_path #经过merged处理后
 processed_path=$data_root/baseline/processed_path #经过preprocess函数处理后
 BPE_out=$data_root/bpe #存储学习到的bpe model
-BPESIZE=35000
-moses_decoder="../requirements/mosesdecoder"
+BPESIZE=40000
+moses_decoder="../../requirements/mosesdecoder"
 SCRIPTS=$moses_decoder/scripts
 TOKENIZER=$SCRIPTS/tokenizer
 LC=$SCRIPTS/tokenizer/lowercase.perl
@@ -24,8 +24,6 @@ CLEAN=$SCRIPTS/training/clean-corpus-n.perl
 LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名的索引 
     #"ar de"
     #"de ar" 由于ar采取右对齐，数据处理上存在问题，暂时放弃这个数据集
-    "de ru"
-    "ru de"
     "en fr"
     "fr en"
     "en ru"
@@ -37,7 +35,6 @@ LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名�
 )
 LANG_PAIRS_real=( #actual exist lang pairs
     #"ar de"
-    "de ru"
     "en fr"
     "en ru"
     "en zh"

@@ -7,6 +7,7 @@ import shutil
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--num", type=str, help="numbers of phrases to conduct code-swithing", required=True)
+    parser.add_argument("--ratio", type=str, help="max ratio of words to be conducted code-switching", required=True)
     parser.add_argument("--src", type=str, help="source language", required=True)
     parser.add_argument("--tgt", type=str, help="target language", required=True)
     args = parser.parse_args()
@@ -18,6 +19,7 @@ def main():
     tgt = args.tgt
     lang_pairs=src+"-"+tgt
     num = args.num #numbers of phrases to conduct code-switching 
+    ratio = args.num #max ratio of words to be conducted code-switching
     dict_file = "/home/ryougiguda/Projects/multilingual_nmt/data/dictionaries/" + tgt + "-" + src + ".0-5000.txt"
     corpus_path= "/home/ryougiguda/Projects/multilingual_nmt/data/baseline/data_for_bpe_learning/" #path of corpus 
     code_switched_path="/home/ryougiguda/Projects/multilingual_nmt/data/code_switching/code_switched_path/" #path of code_switched data 
@@ -35,7 +37,7 @@ def main():
     with open(dict_file, "r") as file:
         for line in file:
             # 去除行末的换行符并按空格分割为键值对
-            value , key = line.strip().split(" ")
+            value , key = line.strip().split(None, 1) #以空格或者tab分割，由于字典格式不统一
             # 将键值对添加到字典中
             code_dict[key] = value
     keys_set = set(code_dict.keys()) #使用集合存放字典的键加快查找速度
@@ -50,8 +52,10 @@ def main():
                         tokens1 = src_line.strip().split(" ")
                         tokens2 = tgt_line.strip().split(" ")
                         tokens2_set = set(tokens2)
-                        count = int(num)
-                        for i in range(len(tokens1)):
+                        leng=len(tokens1)
+                        max_len=int(ratio)*leng
+                        count = min(int(num),max_len)
+                        for i in range(leng):
                             if tokens1[i] in keys_set and code_dict.get(tokens1[i]) in tokens2_set:
                                 tokens1[i] = code_dict[tokens1[i]]
                                 count -= 1

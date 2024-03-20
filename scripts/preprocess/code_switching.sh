@@ -1,28 +1,27 @@
 #!/bin/bash
-ROOT=../fairseq
+ROOT=../../fairseq
 SCRIPTS=$ROOT/scripts
 SPM_TRAIN=$SCRIPTS/spm_train.py
 SPM_ENCODE=$SCRIPTS/spm_encode.py
 TRAIN_MINLEN=1  # remove sentences with <1 BPE token
 TRAIN_MAXLEN=250  # remove sentences with >250 BPE tokens
 data_root="/home/ryougiguda/Projects/multilingual_nmt/data"   # 指定文件夹路径
-data_for_bpe_learning=$data_root/baseline/data_for_bpe_learning #初步分词后
-data_code_switching=$data_root/code_switching/code_switched_path #转码后
-dict_path=$data_root/dictionaries #转码用字典
+data_for_bpe_learning=$data_root/baseline/data_for_bpe_learning #经过初步处理后，用于bpe学习
+data_code_switching=$data_root/code_switching/code_switched_path #经过code-switching后
 bpe_path=$data_root/code_switching/bpe_path #经过bpe处理后
 add_tokens_path=$data_root/code_switching/add_tokens_path #经过add_tokens处理后
 merged_path=$data_root/code_switching/merged_path #经过merged处理后
 processed_path=$data_root/code_switching/processed_path #经过preprocess函数处理后
 BPE_out=$data_root/bpe #存储学习到的bpe model
-
-# 打开文件并读取第一行内容
-first_line=$(head -n 1 stats_code.txt)
-read -a stats <<< "$first_line" #获取当前已进行过的处理
+BPESIZE=40000
+moses_decoder="../../requirements/mosesdecoder"
+SCRIPTS=$moses_decoder/scripts
+TOKENIZER=$SCRIPTS/tokenizer
+LC=$SCRIPTS/tokenizer/lowercase.perl
+CLEAN=$SCRIPTS/training/clean-corpus-n.perl
 LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名的索引 
     #"ar de"
     #"de ar" 由于ar采取右对齐，数据处理上存在问题，暂时放弃这个数据集
-    "de ru"
-    "ru de"
     "en fr"
     "fr en"
     "en ru"
@@ -34,22 +33,25 @@ LANG_PAIRS=(  #双向的数据。是对真实数据创建了一个反向命名�
 )
 LANG_PAIRS_real=( #actual exist lang pairs
     #"ar de"
-    "de ru"
     "en fr"
     "en ru"
     "en zh"
     "es fr"
 )
+# 打开文件并读取第一行内容
+first_line=$(head -n 1 stats_code.txt)
+read -a stats <<< "$first_line" #获取当前已进行过的处理
 
 if [ "${stats:0:1}" == "0" ]; then 
 	rm -r ${data_code_switching}
 	mkdir -p ${data_code_switching}
 	for PAIR in "${LANG_PAIRS[@]}"; do    		
     		code_num=3
+    		max_ratio=0.4
     		PAIR=($PAIR)
     		SRC=${PAIR[0]}
     		TGT=${PAIR[1]}
-		python code_switching.py --num "${code_num}" --src "${SRC}" --tgt "${TGT}" 
+		python code_switching.py --num "${code_num}" --ratio "${max_ratio}" --src "${SRC}" --tgt "${TGT}" 
 		cp $data_for_bpe_learning/train.${SRC}-${TGT}.${TGT}  $data_code_switching/train.${SRC}-${TGT}.${TGT}
         	cp $data_for_bpe_learning/valid.${SRC}-${TGT}.${TGT}  $data_code_switching/valid.${SRC}-${TGT}.${TGT}
         	cp $data_for_bpe_learning/test.${SRC}-${TGT}.${TGT}  $data_code_switching/test.${SRC}-${TGT}.${TGT}

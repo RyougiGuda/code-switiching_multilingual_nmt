@@ -3,8 +3,8 @@ import random
 import pandas as pd
 
 # 输入文件夹路径和输出文件夹路径
-input_folder = "../data/raw"
-output_folder = "../data/divided_data"
+input_folder = "../../data/raw"
+output_folder = "../../data/divided_data"
 
 # 遍历文件夹中的每个文件
 for filename in os.listdir(input_folder):
@@ -28,12 +28,12 @@ for filename in os.listdir(input_folder):
            
             random.shuffle(lines)
             total_lines=len(lines)
-            used_percentage=0.4 #只取原数据集的0.4,减小数据集大小加快训练
+            used_percentage=0.3 #只取原数据集的0.4,减小数据集大小加快训练
             total_lines=total_lines*used_percentage
             # 计算每份数据的大小
-            train_size = int(0.7 * total_lines)
-            test_size = int(0.2 * total_lines)
-            valid_size = int(0.5 * test_size)
+            train_size = int(0.8 * total_lines)
+            test_size = int(0.1 * total_lines)
+            valid_size = test_size
             # 分割点索引位置
             split_point1 = train_size
             split_point2 = train_size + test_size
