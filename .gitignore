@@ -9,18 +9,17 @@ data/*
 requirements/*
 logs/*
 model/*
-scripts/checkpoints
-
+evaluate/*
 
 
 
 !apex/*.gitkeep
 !fairseq/*.gitkeep
 !data/*.gitkeep
-
 !data/dictionaries/*.gitkeep
 !data/raw/*.gitkeep
 !data/vectors/*.gitkeep
 !data/wordsim/*.gitkeep
 !logs/*.gitkeep
 !model/*.keep
+!evaluate/*.keep
