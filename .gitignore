@@ -10,7 +10,7 @@ requirements/*
 logs/*
 model/*
 evaluate/*
-
+scripts/train_baseline/result.txt
 
 
 !apex/*.gitkeep

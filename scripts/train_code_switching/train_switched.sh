@@ -14,4 +14,4 @@ CUDA_VISIBLE_DEVICES=0 fairseq-train \
     --log-interval 100 \
     --log-format simple --log-file log_1.txt \
     --tensorboard-logdir logs \
-    --save-dir ../../model/baseline/checkpoints
+    --save-dir ../../model/code_switching/checkpoints
