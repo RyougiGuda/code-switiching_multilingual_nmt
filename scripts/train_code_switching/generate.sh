@@ -1,7 +1,7 @@
 path_2_data=../../data/code_switching/processed_path
 out_path=../../evaluate/code_switching
 fairseq-generate $path_2_data \
-    --path ../../model/baseline/checkpoints/checkpoint_best.pt \
+    --path ../../model/code_switching/checkpoints/checkpoint_best.pt \
     --batch-size 128 --beam 5 --remove-bpe >${out_path}/result.txt
     
     
