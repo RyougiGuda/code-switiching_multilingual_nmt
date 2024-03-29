@@ -11,7 +11,7 @@ data_code_switching=$data_root/code_switching/code_switched_path #经过code-swi
 bpe_path=$data_root/code_switching/bpe_path #经过bpe处理后
 add_tokens_path=$data_root/code_switching/add_tokens_path #经过add_tokens处理后
 merged_path=$data_root/code_switching/merged_path #经过merged处理后
-processed_path=$data_root/code_switching/processed_path #经过preprocess函数处理后
+processed_path=$data_root/code_switching/processed_path5 #经过preprocess函数处理后
 BPE_out=$data_root/bpe #存储学习到的bpe model
 BPESIZE=40000
 moses_decoder="../../requirements/mosesdecoder"
@@ -46,7 +46,7 @@ if [ "${stats:0:1}" == "0" ]; then
 	rm -r ${data_code_switching}
 	mkdir -p ${data_code_switching}
 	for PAIR in "${LANG_PAIRS[@]}"; do    		
-    		code_num=3
+    		code_num=5
     		max_ratio=0.4
     		PAIR=($PAIR)
     		SRC=${PAIR[0]}

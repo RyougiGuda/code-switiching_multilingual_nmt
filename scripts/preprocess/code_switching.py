@@ -20,7 +20,7 @@ def main():
     lang_pairs=src+"-"+tgt
     num = args.num #numbers of phrases to conduct code-switching 
     ratio = args.num #max ratio of words to be conducted code-switching
-    dict_file = "/home/ryougiguda/Projects/multilingual_nmt/data/dictionaries/" + tgt + "-" + src + ".0-5000.txt"
+    dict_file = "/home/ryougiguda/Projects/multilingual_nmt/data/dictionaries/" + tgt + "-" + src + ".txt"
     corpus_path= "/home/ryougiguda/Projects/multilingual_nmt/data/baseline/data_for_bpe_learning/" #path of corpus 
     code_switched_path="/home/ryougiguda/Projects/multilingual_nmt/data/code_switching/code_switched_path/" #path of code_switched data 
     if os.path.exists(dict_file)!=True:  #如果没有对应词典，则直接将源文件复制过去

@@ -1,6 +1,10 @@
-MULTI_BLEU=../../requirements/mosesdecoder/scripts/generic/multi-bleu.perl
+sacrebleu=../../fairseq/scripts/sacrebleu.sh
+out_path=../../evaluate/baseline   
+DETOKENIZER=../../requirements/mosesdecoder/scripts/tokenizer/detokenizer.perl
 
- out_path=../../evaluate/baseline   
 
-${MULTI_BLEU} -lc ${out_path}/true.txt < ${out_path}/predict.txt
+${DETOKENIZER}   < ${out_path}/true.a.txt > ${out_path}/true.detok.txt
+${DETOKENIZER}   < ${out_path}/predict.a.txt > ${out_path}/predict.detok.txt
+sacrebleu ${out_path}/true.detok.txt -i ${out_path}/predict.detok.txt -m bleu -b -w 4
+
 
