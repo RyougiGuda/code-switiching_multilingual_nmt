@@ -19,7 +19,7 @@ output1="${file_dir}/${filename1%.*}.a.$extension"
 output2="${file_dir}/${filename2%.*}.a.$extension"
 
 # 获取 file1 中大于 10 个词的行号，并将行号保存到数组中
-mapfile -t lines < <(awk '{ if(NF > ${filter_num}) print NR }' "$file1")
+mapfile -t lines < <(awk -v num="$filter_num" '{ if(NF > num) print NR }' "$file1")
 
 # 将 file1 中大于  n 个词的行写入 output1 文件
 awk 'FNR==NR {a[$1]; next} FNR in a' <(printf "%s\n" "${lines[@]}") "$file1" > "$output1"
